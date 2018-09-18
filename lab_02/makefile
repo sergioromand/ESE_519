@@ -1,6 +1,6 @@
 name = output
 device = /dev/tty.usbmodem1451
-src = BlinkPullUpInterrupt.c
+src = 2_1_2.c
 flags = -std=c11 -Os
 baud = 9600
 
