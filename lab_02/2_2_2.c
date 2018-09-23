@@ -8,7 +8,7 @@
 #include <stdlib.h>
 
 volatile unsigned int diff, edge1, edge2, overflows, pulseDone; 
-unsigned long pulse_width; 
+long double pulse_width; 
 
 
 ISR(TIMER1_COMPA_vect)
@@ -18,26 +18,27 @@ ISR(TIMER1_COMPA_vect)
 	}
 	else {
 		TIMSK1 &= ~(1 << OCIE1A);             //disable output compare
-		TIMSK1 |= 0x20;						  //enable input capture
+		TIMSK1 |= (1 << ICIE1);						  //enable input capture
 	}
 }
 
 ISR(TIMER1_CAPT_vect)
 {
-	if((TCCR1B & 0x40) == 0x40) {
-		//RISING EDGE
-		edge1 = ICR1;			//TimeStamp;
-		TCCR1B &= 0xBF;			//Now check for falling edge
-		TIFR1 |= 0x20;			//clear flag
-	}
-	else {
+	if(!(TCCR1B & 0x40)) {
 		//FALLING EDGE
 		edge2 = ICR1;			//TimeStamp
+		TCCR1B |= (1 << ICES1); //check for rising edge next time
 		TIFR1 |= 0x20;			//clear flag
 		pulseDone = 1;          //ready to measure
 		TIMSK1 &= 0xDF;			//disable input capture
 		TIMSK1	|=	0x02;		// enable output compare A interrupt
 		OCR1A = TCNT1 + 3200; 	//wait 200 uS
+	}
+	else {
+		//RISING EDGE
+		edge1 = ICR1;			 //TimeStamp;
+		TCCR1B &= ~(1 << ICES1);	//Now check for falling edge
+		TIFR1 |= 0x20;			 //clear flag
 	}
 }
 
@@ -86,11 +87,15 @@ int main(void)
 		if(pulseDone) {
 			if(edge2 < edge1) {
 				overflows--;
+				diff = edge1 - edge2;
+			}else {
+				diff = edge2 - edge1;
 			}
-			diff = edge2 - edge1;
 			pulse_width = overflows * 65535u + (long)diff;
-			pulse_width = pulse_width * 0.0000000625;
-			printf("Pulse Width: %l\n", pulse_width);
+			printf("Pulse width: %u\n", pulse_width);
+			//printf("Edge 1: %u, Edge 2: %u, Overflows: %u\n", edge1, edge2, overflows);
+			overflows = 0;
+			pulseDone = 0;
 		}
 	}
 	
