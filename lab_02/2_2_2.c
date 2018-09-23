@@ -8,7 +8,7 @@
 #include <stdlib.h>
 
 volatile unsigned int diff, edge1, edge2, overflows, pulseDone; 
-long double pulse_width; 
+long double num_ticks; 
 
 
 ISR(TIMER1_COMPA_vect)
@@ -91,8 +91,8 @@ int main(void)
 			}else {
 				diff = edge2 - edge1;
 			}
-			pulse_width = overflows * 65535u + (long)diff;
-			printf("Pulse width: %u\n", pulse_width);
+			num_ticks = overflows * 65535u + (long)diff;
+			printf("Pulse width: %u\n", num_ticks);
 			//printf("Edge 1: %u, Edge 2: %u, Overflows: %u\n", edge1, edge2, overflows);
 			overflows = 0;
 			pulseDone = 0;
