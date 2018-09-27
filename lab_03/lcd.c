@@ -32,6 +32,7 @@
 
 uint8_t is_reversed = 0;
 
+
 int pagemap[] = { 3, 2, 1, 0, 7, 6, 5, 4 };
 
 // buffer input which prints initial splash
@@ -111,7 +112,7 @@ uint8_t buff[128*64/8] = {
 
 //font to print ascii characters
 const uint8_t font[] PROGMEM = {
-	0x0, 0x0, 0x0, 0x0, 0x0,       // Ascii 0
+	0x0, 0x0, 0x0, 0x0, 0x0,       // Ascii blank
 	0x7C, 0xDA, 0xF2, 0xDA, 0x7C,  //ASC(01)
 	0x7C, 0xD6, 0xF2, 0xD6, 0x7C,  //ASC(02)
 	0x38, 0x7C, 0x3E, 0x7C, 0x38,
@@ -366,6 +367,16 @@ const uint8_t font[] PROGMEM = {
 	0x0, 0xF8, 0x80, 0x80, 0x78,
 	0x0, 0x98, 0xB8, 0xE8, 0x48,
     0x0, 0x3C, 0x3C, 0x3C, 0x3C,};
+	
+//type to print some letters
+// TO-DO  fill this data with data to draw 5x8 letter 
+const uint8_t type_a[] PROGMEM = {0x0, 0x0, 0x0, 0x0, 0x0,};   //  a
+const uint8_t type_b[] PROGMEM = {0x0, 0x0, 0x0, 0x0, 0x0,};   //  b
+const uint8_t type_c[] PROGMEM = {0x0, 0x0, 0x0, 0x0, 0x0,};   //  c
+const uint8_t type_d[] PROGMEM = {0x0, 0x0, 0x0, 0x0, 0x0,};   //  d
+const uint8_t type_e[] PROGMEM = {0x0, 0x0, 0x0, 0x0, 0x0,};   //  e
+const uint8_t type_f[] PROGMEM = {0x0, 0x0, 0x0, 0x0, 0x0,};   //  f
+const uint8_t type_g[] PROGMEM = {0x0, 0x0, 0x0, 0x0, 0x0,};   //  g
 
 //lcd clear screen function
 void clear_screen(void) {
@@ -495,44 +506,290 @@ void drawchar(uint8_t *buff, uint8_t x, uint8_t line, uint8_t c) {
 
 
 // the most basic function, set a single pixel
-void setpixel(uint8_t *buff, uint8_t x, uint8_t y, uint8_t color) {
-	
+void setpixel(uint8_t *buff, uint8_t x, uint8_t y, uint8_t color) 
+{		
+	if (y<=8){
+		buff[x-1] |= (1 << (7-(y-1)) );
+	}
+	else if ((y%8)!=0){
+		buff[x+((y/8)*128)-1] |= (1 << (7-((y%8)-1)) );
+	}
+	else if ((y%8)==0){
+		buff[x+(((y/8)-1)*128)-1] |= (1 << 0);
+	}	
 }
 
 // function to clear a single pixel
-void clearpixel(uint8_t *buff, uint8_t x, uint8_t y) {
-	
+void clearpixel(uint8_t *buff, uint8_t x, uint8_t y) 
+{	
+		if (y<=8){
+			buff[x-1] &= ~(1 << (7-(y-1)) );
+		}
+		else if ((y%8)!=0){
+			buff[x+((y/8)*128)-1] &= ~(1 << (7-((y%8)-1)) );
+		}
+		else if ((y%8)==0){
+			buff[x+(((y/8)-1)*128)-1] &= !(1 << 0);
+		}	
 }
 
 // function to write a string on the lcd
 void drawstring(uint8_t *buff, uint8_t x, uint8_t line, uint8_t *c) {
+	uint8_t curr = 0;
+	while(c[curr] != 0) {
+		drawchar(buff, x + (5 * curr), line, c[curr]);
+		curr++;
+	}
 	
 }
 
 // use bresenham's algorithm to write this function to draw a line
-void drawline(uint8_t *buff,uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1,uint8_t color) {
-
+void drawline(uint8_t *buff,uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1,uint8_t color) 
+{
+	//sorting
+	uint8_t xMax;
+	uint8_t xMin;
+	uint8_t yMax;
+	uint8_t yMin;
+	uint8_t dy;
+	uint8_t y;
+	uint8_t slope;
+	if(x0 <= x1) {
+		xMin = x0;
+		xMax = x1;
+	}
+	else {
+		xMin = x1;
+		xMax = x0;
+	}
+	if(y0 <= y1) {
+		xMin = y0;
+		xMax = y1;
+	}
+	else {
+		xMin = y1;
+		xMax = y0;
+	}
+	y = yMin;
+	dy = 2 * (yMax - yMin);
+	slope = dy - (xMax - xMin);
+	if(x0 == x1) {
+		for(uint8_t i = yMin; i <= yMax; i++) {
+			setpixel(buff, x0, i, color);
+		}
+	}
+	else if(y0 = y1) {
+		for(uint8_t i = xMin; i <= xMax; i++) {
+			setpixel(buff, i, y0, color);
+		}
+	}
+	else {
+		for(uint8_t x = xMin; x <= xMax, x++) {
+			setpixel(buff, x, y, color);
+			slope += dy;
+			if(slope >= 0) {
+				y++;
+				slope -= 2 * (xMax - xMin);
+			}
+		}
+	}
 }
 
-// function to draw a filled rectangle
-void fillrect(uint8_t *buff,uint8_t x, uint8_t y, uint8_t w, uint8_t h,uint8_t color) {
+/*
+seems unnecessary
+void drawline_hor(uint8_t *buff,uint8_t x0, uint8_t x1, uint8_t y, uint8_t color) 
+{	
+	uint8_t w = abs(x0-x1);
+
+	if (x0<x1)
+	{
+		for (uint8_t i =0; i<w; i++ )
+		{
+			if (y<=8){
+				buff[(x0+i)-1] |= (1 << (7-(y-1)) );
+			}
+			else if ((y%8)!=0){
+				buff[(x0+i)+((y/8)*128)-1] |= (1 << (7-((y%8)-1)) );
+			}
+			else if ((y%8)==0){
+				buff[(x0+i)+(((y/8)-1)*128)-1] |= (1 << 0);
+			}
+		}
+	}
+	else
+	{
+		for (uint8_t i =0; i<w; i++ )
+		{
+			if (y<=8){
+				buff[(x1+i)-1] |= (1 << (7-(y-1)) );
+			}
+			else if ((y%8)!=0){
+				buff[(x1+i)+((y/8)*128)-1] |= (1 << (7-((y%8)-1)) );
+			}
+			else if ((y%8)==0){
+				buff[(x1+i)+(((y/8)-1)*128)-1] |= (1 << 0);
+			}
+		}
+	}	
+}
+
+void drawline_vert(uint8_t *buff,uint8_t y0, uint8_t y1, uint8_t x, uint8_t color) 
+{
+	uint8_t h = abs(y0-y1);
+
+	if (y0<y1)
+	{
+		for (uint8_t j =0; j<h; j++ )
+		{
+			if ((y0+j)<=8){
+				buff[(x)-1] |= (1 << (7-((y0+j)-1)) );
+			}
+			else if (((y0+j)%8)!=0){
+				buff[(x)+(((y0+j)/8)*128)-1] |= (1 << (7-(((y0+j)%8)-1)) );
+			}
+			else if (((y0+j)%8)==0){
+				buff[(x)+((((y0+j)/8)-1)*128)-1] |= (1 << 0);
+			}
+		}
+	}
+	else
+	{
+		for (uint8_t j =0; j<h; j++ )
+		{
+			if ((y1+j)<=8){
+				buff[(x)-1] |= (1 << (7-((y1+j)-1)) );
+			}
+			else if (((y1+j)%8)!=0){
+				buff[(x)+(((y1+j)/8)*128)-1] |= (1 << (7-(((y1+j)%8)-1)) );
+			}
+			else if (((y1+j)%8)==0){
+				buff[(x)+((((y1+j)/8)-1)*128)-1] |= (1 << 0);
+			}
+		}
+	}
+}
+*/
+
+// function to draw a filled rectangle- why not call drawLine or setPixel?
+void fillrect(uint8_t *buff,uint8_t x, uint8_t y, uint8_t w, uint8_t h,uint8_t color) 
+{
 	
+	for (uint8_t i =0; i<w; i++ ) 
+	{
+		for (uint8_t j =0; j<h; j++ ) 
+		{
+			if ((y+j)<=8){
+			buff[(x+i)-1] |= (1 << (7-((y+j)-1)) );
+			}
+			else if (((y+j)%8)!=0){
+				buff[(x+i)+(((y+j)/8)*128)-1] |= (1 << (7-(((y+j)%8)-1)) );
+			}
+			else if (((y+j)%8)==0){
+				buff[(x+i)+((((y+j)/8)-1)*128)-1] |= (1 << 0);
+			}
+		}
+	}
+		
 }
 
 
-// function to draw a rectangle
+// function to draw a rectangle- why not setPixel?
 void drawrect(uint8_t *buff,uint8_t x, uint8_t y, uint8_t w, uint8_t h,uint8_t color) {
 	
+	
+	for (uint8_t i =0; i<w; i++ )
+	{
+		for (uint8_t j =0; j<h; j++ )
+		{
+			if ((y+j)<=8){
+				buff[(x+i)-1] |= (1 << (7-((y+j)-1)) );
+			}
+			else if (((y+j)%8)!=0){
+				buff[(x+i)+(((y+j)/8)*128)-1] |= (1 << (7-(((y+j)%8)-1)) );
+			}
+			else if (((y+j)%8)==0){
+				buff[(x+i)+((((y+j)/8)-1)*128)-1] |= (1 << 0);
+			}
+		}
+	}
+	
+		
+		for (uint8_t i =1; i<w-1; i++ )
+		{
+			for (uint8_t j =1; j<h-1; j++ )
+			{
+				if ((y+j)<=8){
+					buff[(x+i)-1] &= (1 << ~(7-((y+j)-1)) );
+				}
+				else if (((y+j)%8)!=0){
+					buff[(x+i)+(((y+j)/8)*128)-1] &= ~(1 << (7-(((y+j)%8)-1)) );
+				}
+				else if (((y+j)%8)==0){
+					buff[(x+i)+((((y+j)/8)-1)*128)-1] &= ~(1 << 0);
+				}
+			}
+		}
+	
+	
 }
 
+void circ(uint8_t x0, uint8_t y0, uint8_t x,uint8_t y) {
+	setpixel(buff, x0 + x, y0 + y, color);
+	setpixel(buff, x0 - x, y0 + y, color);
+	setpixel(buff, x0 + x, y0 - y, color);
+	setpixel(buff, x0 - x, y0 - y, color);
+	setpixel(buff, x0 + y, y0 + x, color);
+	setpixel(buff, x0 - y, y0 + x, color);
+	setpixel(buff, x0 + y, y0 - x, color);
+	setpixel(buff, x0 - y, y0 - x, color);
+}
 
 // function to draw a circle
 void drawcircle(uint8_t *buff,uint8_t x0, uint8_t y0, uint8_t r,uint8_t color) {
+	uint8_t x = 0;
+	uint8_t y = r;
+	uint8_t d = 3 - 2 * r;
+	while(y >= x) {
+		circ(x0, y0, x, y);
+		x++;
+
+		if(d > 0) {
+			y--;
+			d = d + 4 * (x - y) + 10;
+		}
+		else {
+			d = d + 4 * x + 6;
+			circ(x0, y0, x, y);
+		}
+	}
+
 	
 }
 
 
 // function to draw a filled circle
 void fillcircle(uint8_t *buff,uint8_t x0, uint8_t y0, uint8_t r,uint8_t color) {
-	
+	int x = r;
+	int y = 0;
+	int dx = 1 - (r << 1);
+	int dy = 0;
+	int dr = 0;
+	while(x >= y) {
+		for(int curr = x0 - y; curr <= x0; curr++) {
+			setpixel(buff, curr, y0 + x, color);
+			setpixel(buff, curr, y0 - x; color);
+		}
+		for(int curr = x0 - x; curr <= x0; curr++) {
+			setpixel(buff, curr, y0 + y, color);
+			setpixel(buff, curr, y0 - y; color);
+		}
+		y++;
+		dr += dx;
+		dy += 2;
+		if(((dr << 1) + dx) > 0) {
+			x--;
+			dr += dx;
+			dx += 2;
+		}
+	}
 }
