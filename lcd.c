@@ -369,6 +369,7 @@ const uint8_t font[] PROGMEM = {
     0x0, 0x3C, 0x3C, 0x3C, 0x3C,};
 	
 //type to print some letters
+// TO-DO  fill this data with data to draw 5x8 letter 
 const uint8_t type_a[] PROGMEM = {0x0, 0x0, 0x0, 0x0, 0x0,};   //  a
 const uint8_t type_b[] PROGMEM = {0x0, 0x0, 0x0, 0x0, 0x0,};   //  b
 const uint8_t type_c[] PROGMEM = {0x0, 0x0, 0x0, 0x0, 0x0,};   //  c
@@ -535,7 +536,7 @@ void clearpixel(uint8_t *buff, uint8_t x, uint8_t y)
 // function to write a string on the lcd
 void drawstring(uint8_t *buff, uint8_t x, uint8_t line, uint8_t *c) {
 	
-	
+	  //   TO-DO
 	  //  seach for "type_a" in this file.  I started a 
 	  //  list of individual letters that can be filled out  for a-g
 	
@@ -544,7 +545,7 @@ void drawstring(uint8_t *buff, uint8_t x, uint8_t line, uint8_t *c) {
 // use bresenham's algorithm to write this function to draw a line
 void drawline(uint8_t *buff,uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1,uint8_t color) 
 {
-
+	// TO-DO
 }
 
 void drawline_hor(uint8_t *buff,uint8_t x0, uint8_t x1, uint8_t y, uint8_t color) 
@@ -685,7 +686,7 @@ void drawrect(uint8_t *buff,uint8_t x, uint8_t y, uint8_t w, uint8_t h,uint8_t c
 
 // function to draw a circle
 void drawcircle(uint8_t *buff,uint8_t x0, uint8_t y0, uint8_t r,uint8_t color) {
-	
+	// TO-DO
 	/**********  COPY PASTED THIS 09/27/18   , not yet debugged  *****************
 	
 	// Function for circle-generation
@@ -722,6 +723,6 @@ void drawcircle(uint8_t *buff,uint8_t x0, uint8_t y0, uint8_t r,uint8_t color) {
 
 // function to draw a filled circle
 void fillcircle(uint8_t *buff,uint8_t x0, uint8_t y0, uint8_t r,uint8_t color) {
-	
+	// TO-DO
 }
 
