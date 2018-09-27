@@ -68,6 +68,12 @@ uint8_t color);
 void drawline(uint8_t *buff,
 uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1,
 uint8_t color);
+void drawline_hor(uint8_t *buff,
+uint8_t x0, uint8_t x1, uint8_t y,
+uint8_t color);
+void drawline_vert(uint8_t *buff,
+uint8_t y0, uint8_t y1, uint8_t x,
+uint8_t color);
 
 void drawcircle(uint8_t *buff,
 uint8_t x0, uint8_t y0, uint8_t r,

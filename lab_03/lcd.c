@@ -369,7 +369,7 @@ const uint8_t font[] PROGMEM = {
     0x0, 0x3C, 0x3C, 0x3C, 0x3C,};
 	
 //type to print some letters
-// TO-DO  fill this data with data to draw 5x8 letter 
+			// TO-DO  fill this data with data to draw 5x8 letter 
 const uint8_t type_a[] PROGMEM = {0x0, 0x0, 0x0, 0x0, 0x0,};   //  a
 const uint8_t type_b[] PROGMEM = {0x0, 0x0, 0x0, 0x0, 0x0,};   //  b
 const uint8_t type_c[] PROGMEM = {0x0, 0x0, 0x0, 0x0, 0x0,};   //  c
@@ -449,8 +449,10 @@ inline void spiwrite(uint8_t c) {
     SCLK_PORT |= _BV(SCLK);
   }
 
- 
+
 }
+
+
 void lcd_command(uint8_t c) {
   A0_PORT &= ~_BV(A0);
 
@@ -533,27 +535,26 @@ void clearpixel(uint8_t *buff, uint8_t x, uint8_t y)
 		}	
 }
 
-// function to write a string on the lcd
 void drawstring(uint8_t *buff, uint8_t x, uint8_t line, uint8_t *c) {
 	uint8_t curr = 0;
 	while(c[curr] != 0) {
 		drawchar(buff, x + (5 * curr), line, c[curr]);
 		curr++;
 	}
-	
 }
 
-// use bresenham's algorithm to write this function to draw a line
-void drawline(uint8_t *buff,uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1,uint8_t color) 
+void drawline(uint8_t *buff,uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1,uint8_t color)
 {
 	//sorting
 	uint8_t xMax;
 	uint8_t xMin;
 	uint8_t yMax;
 	uint8_t yMin;
-	uint8_t dy;
-	uint8_t y;
-	uint8_t slope;
+	//uint8_t dy;
+	//uint8_t y;
+	//uint8_t slope;
+	
+	
 	if(x0 <= x1) {
 		xMin = x0;
 		xMax = x1;
@@ -563,40 +564,69 @@ void drawline(uint8_t *buff,uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1,uint8
 		xMax = x0;
 	}
 	if(y0 <= y1) {
-		xMin = y0;
-		xMax = y1;
+		yMin = y0;
+		yMax = y1;
 	}
 	else {
-		xMin = y1;
-		xMax = y0;
+		yMin = y1;
+		yMax = y0;
 	}
-	y = yMin;
-	dy = 2 * (yMax - yMin);
-	slope = dy - (xMax - xMin);
+	//y = yMin;
+	//dy = 2 * (yMax - yMin);
+	//slope = dy - (xMax - xMin);
 	if(x0 == x1) {
 		for(uint8_t i = yMin; i <= yMax; i++) {
 			setpixel(buff, x0, i, color);
 		}
 	}
-	else if(y0 = y1) {
+	else if(y0 == y1) {
 		for(uint8_t i = xMin; i <= xMax; i++) {
 			setpixel(buff, i, y0, color);
 		}
 	}
-	else {
-		for(uint8_t x = xMin; x <= xMax, x++) {
-			setpixel(buff, x, y, color);
-			slope += dy;
-			if(slope >= 0) {
-				y++;
-				slope -= 2 * (xMax - xMin);
-			}
+	else if ((x0!=x1) && (y0!=y1)){
+		
+		drawdiag(buff,x0,y0,x1,y1,color);
+	}
+}
+			
+		
+
+void drawdiag(uint8_t *buff, uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, uint8_t color)
+{
+	
+	if ((y0 != y1) && (x0 != x1)){
+		
+	uint8_t dx, dy, p, x, y;
+	
+	dx=x1-x0;
+	dy=y1-y0;
+	
+	x=x0;
+	y=y0;
+	
+	p=2*dy-dx;
+	
+	while(x<x1)
+	{
+		if(p>=0)
+		{
+			setpixel(buff,x,y,1);
+			y=y+1;
+			p=p+2*dy-2*dx;
 		}
+		else
+		{
+			setpixel(buff,x,y,1);
+			p=p+2*dy;
+		}
+		x=x+1;
+	}
+	
 	}
 }
 
-/*
-seems unnecessary
+
 void drawline_hor(uint8_t *buff,uint8_t x0, uint8_t x1, uint8_t y, uint8_t color) 
 {	
 	uint8_t w = abs(x0-x1);
@@ -668,9 +698,8 @@ void drawline_vert(uint8_t *buff,uint8_t y0, uint8_t y1, uint8_t x, uint8_t colo
 		}
 	}
 }
-*/
 
-// function to draw a filled rectangle- why not call drawLine or setPixel?
+// function to draw a filled rectangle
 void fillrect(uint8_t *buff,uint8_t x, uint8_t y, uint8_t w, uint8_t h,uint8_t color) 
 {
 	
@@ -693,7 +722,7 @@ void fillrect(uint8_t *buff,uint8_t x, uint8_t y, uint8_t w, uint8_t h,uint8_t c
 }
 
 
-// function to draw a rectangle- why not setPixel?
+// function to draw a rectangle
 void drawrect(uint8_t *buff,uint8_t x, uint8_t y, uint8_t w, uint8_t h,uint8_t color) {
 	
 	
@@ -733,7 +762,9 @@ void drawrect(uint8_t *buff,uint8_t x, uint8_t y, uint8_t w, uint8_t h,uint8_t c
 	
 }
 
-void circ(uint8_t x0, uint8_t y0, uint8_t x,uint8_t y) {
+
+// function to draw a circle
+void circ(uint8_t x0, uint8_t y0, uint8_t x,uint8_t y, uint8_t color) {
 	setpixel(buff, x0 + x, y0 + y, color);
 	setpixel(buff, x0 - x, y0 + y, color);
 	setpixel(buff, x0 + x, y0 - y, color);
@@ -744,52 +775,101 @@ void circ(uint8_t x0, uint8_t y0, uint8_t x,uint8_t y) {
 	setpixel(buff, x0 - y, y0 - x, color);
 }
 
+ 
+
 // function to draw a circle
 void drawcircle(uint8_t *buff,uint8_t x0, uint8_t y0, uint8_t r,uint8_t color) {
-	uint8_t x = 0;
-	uint8_t y = r;
-	uint8_t d = 3 - 2 * r;
-	while(y >= x) {
-		circ(x0, y0, x, y);
-		x++;
-
-		if(d > 0) {
-			y--;
-			d = d + 4 * (x - y) + 10;
-		}
-		else {
-			d = d + 4 * x + 6;
-			circ(x0, y0, x, y);
-		}
-	}
-
 	
+    int x = 0, y = r;
+    int d = 3 - 2 * r;
+    while (y >= x)
+    {
+	    // for each pixel we will
+	    // draw all eight pixels
+	    circ(x0, y0, x, y, color);
+	    x++;
+	    
+	    // check for decision parameter
+	    // and correspondingly
+	    // update d, x, y
+	    if (d > 0)
+	    {
+		    y--;
+		    d = d + 4 * (x - y) + 10;
+	    }
+	    else
+	    d = d + 4 * x + 6;
+	    circ(x0, y0, x, y, color);
+	    //delay(50);
+    }
 }
 
+void fillcirc(uint8_t *buff,uint8_t x0, uint8_t y0, uint8_t x, uint8_t y,uint8_t color){
+	
+	drawline(buff, x0 - x, y0 + y, x0 + x, y0 + y, color);
+	drawline(buff, x0 - x, y0 - y, x0 + x, y0 - y, color);
+	drawline(buff, x0 - y, y0 + x, x0 + y, y0 + x, color);
+	drawline(buff, x0 - y, y0 - x, x0 + y, y0 - x, color);
+
+
+}
 
 // function to draw a filled circle
 void fillcircle(uint8_t *buff,uint8_t x0, uint8_t y0, uint8_t r,uint8_t color) {
-	int x = r;
-	int y = 0;
-	int dx = 1 - (r << 1);
-	int dy = 0;
-	int dr = 0;
-	while(x >= y) {
-		for(int curr = x0 - y; curr <= x0; curr++) {
-			setpixel(buff, curr, y0 + x, color);
-			setpixel(buff, curr, y0 - x; color);
+		
+		int x = 0, y = r;
+		int d = 3 - 2 * r;
+		while (y >= x)
+		{
+			// for each pixel we will
+			// draw all eight pixels
+			fillcirc(buff,x0, y0, x, y, color);
+			x++;
+			
+			// check for decision parameter
+			// and correspondingly
+			// update d, x, y
+			if (d > 0)
+			{
+				y--;
+				d = d + 4 * (x - y) + 10;
+			}
+			else
+			d = d + 4 * x + 6;
+			fillcirc(buff, x0, y0, x, y, color);
+			//delay(50);
 		}
-		for(int curr = x0 - x; curr <= x0; curr++) {
-			setpixel(buff, curr, y0 + y, color);
-			setpixel(buff, curr, y0 - y; color);
-		}
-		y++;
-		dr += dx;
-		dy += 2;
-		if(((dr << 1) + dx) > 0) {
-			x--;
-			dr += dx;
-			dx += 2;
-		}
-	}
+}
+
+
+void invert_screen()
+{
+	A0_PORT &= ~0x80;   // pull A0 low , pin 3 --> bit 4
+	CS_PORT &= ~0x40;	// pull CS low , pin 2 --> bit 3
+	lcd_command(CMD_SET_COM_REVERSE);
+	CS_PORT |= 0x40;    // pull CS high
+}
+
+void uninvert_screen()
+{
+	A0_PORT &= ~0x80;   // pull A0 low , pin 3 --> bit 4
+	CS_PORT &= ~0x40;	// pull CS low , pin 2 --> bit 3
+	lcd_command(CMD_SET_COM_NORMAL);
+	CS_PORT |= 0x40;    // pull CS high
+}
+
+void black_screen()
+{
+	A0_PORT &= ~0x80;   // pull A0 low , pin 3 --> bit 4
+	CS_PORT &= ~0x40;	// pull CS low , pin 2 --> bit 3
+	lcd_command(CMD_SET_ALLPTS_ON);
+	CS_PORT |= 0x40;    // pull CS high
+}
+
+void unblack_screen()
+{
+	A0_PORT &= ~0x80;   // pull A0 low , pin 3 --> bit 4
+	CS_PORT &= ~0x40;	// pull CS low , pin 2 --> bit 3
+	lcd_command(CMD_SET_ALLPTS_NORMAL);
+	CS_PORT |= 0x40;    // pull CS high
 }
