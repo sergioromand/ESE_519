@@ -370,12 +370,12 @@ const uint8_t font[] PROGMEM = {
 	
 //type to print some letters
 const uint8_t type_a[] PROGMEM = {0x0, 0x0, 0x0, 0x0, 0x0,};   //  a
-const uint8_t type_b[] PROGMEM = {0x0, 0x0, 0x0, 0x0, 0x0,};   //  a
-const uint8_t type_c[] PROGMEM = {0x0, 0x0, 0x0, 0x0, 0x0,};   //  a
-const uint8_t type_d[] PROGMEM = {0x0, 0x0, 0x0, 0x0, 0x0,};   //  a
-const uint8_t type_e[] PROGMEM = {0x0, 0x0, 0x0, 0x0, 0x0,};   //  a
-const uint8_t type_f[] PROGMEM = {0x0, 0x0, 0x0, 0x0, 0x0,};   //  a
-const uint8_t type_g[] PROGMEM = {0x0, 0x0, 0x0, 0x0, 0x0,};   //  a
+const uint8_t type_b[] PROGMEM = {0x0, 0x0, 0x0, 0x0, 0x0,};   //  b
+const uint8_t type_c[] PROGMEM = {0x0, 0x0, 0x0, 0x0, 0x0,};   //  c
+const uint8_t type_d[] PROGMEM = {0x0, 0x0, 0x0, 0x0, 0x0,};   //  d
+const uint8_t type_e[] PROGMEM = {0x0, 0x0, 0x0, 0x0, 0x0,};   //  e
+const uint8_t type_f[] PROGMEM = {0x0, 0x0, 0x0, 0x0, 0x0,};   //  f
+const uint8_t type_g[] PROGMEM = {0x0, 0x0, 0x0, 0x0, 0x0,};   //  g
 
 //lcd clear screen function
 void clear_screen(void) {
@@ -535,6 +535,10 @@ void clearpixel(uint8_t *buff, uint8_t x, uint8_t y)
 // function to write a string on the lcd
 void drawstring(uint8_t *buff, uint8_t x, uint8_t line, uint8_t *c) {
 	
+	
+	  //  seach for "type_a" in this file.  I started a 
+	  //  list of individual letters that can be filled out  for a-g
+	
 }
 
 // use bresenham's algorithm to write this function to draw a line
@@ -681,6 +685,37 @@ void drawrect(uint8_t *buff,uint8_t x, uint8_t y, uint8_t w, uint8_t h,uint8_t c
 
 // function to draw a circle
 void drawcircle(uint8_t *buff,uint8_t x0, uint8_t y0, uint8_t r,uint8_t color) {
+	
+	/**********  COPY PASTED THIS 09/27/18   , not yet debugged  *****************
+	
+	// Function for circle-generation
+	// using Bresenham's algorithm
+	void circleBres(int xc, int yc, int r)
+	{
+		int x = 0, y = r;
+		int d = 3 - 2 * r;
+		while (y >= x)
+		{
+			// for each pixel we will
+			// draw all eight pixels
+			drawCircle(xc, yc, x, y);
+			x++;
+			
+			// check for decision parameter
+			// and correspondingly
+			// update d, x, y
+			if (d > 0)
+			{
+				y--;
+				d = d + 4 * (x - y) + 10;
+			}
+			else
+			d = d + 4 * x + 6;
+			drawCircle(xc, yc, x, y);
+			delay(50);
+		}
+	}
+	   */
 	
 }
 
