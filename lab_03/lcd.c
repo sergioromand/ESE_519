@@ -873,3 +873,77 @@ void unblack_screen()
 	lcd_command(CMD_SET_ALLPTS_NORMAL);
 	CS_PORT |= 0x40;    // pull CS high
 }
+
+
+//A0 (PC0) X-
+//A1 (PC1) Y+
+//A2 (PC2) X+
+//A3 (PC3) Y-
+
+//X- and X+ in digital mode
+//Y- and Y+ in ADC input mode
+//read y value as x coordinate
+int read_screen_x(int xM, int xP, int yM, int yP) {
+	//disable power reduction
+	PRR &= ~(1 << PRADC);
+	//make X- and X+ digital
+	DDRC |= (1 << xM);
+	DDRC |= (1 << xP);
+	//make Y- and Y+ analog input
+	DDRC &= ~(1 << yM);
+	DDRC &= ~(1 << yP);
+	//set xM to high
+	PORTC |= (1 << xM);
+	//set xP to low
+	PORTC &= ~(1 << xP);
+	//set yM to adc in
+	ADMUX = (ADMUX & 0xF8);
+	ADMUX |= ym;
+	//start converting
+	ADCSRA |= (1 << ADSC);
+	//loop until we read 
+	while(ADCSRA && (1 << ADCSRA));
+	//value is read, return it
+	return ADC;
+}
+
+//Y- and Y+ in digital mode
+//X- and X+ in ADC input mode
+//read x value as y coordinate
+int read_screen_y() {
+	//disable power reduction
+	PRR &= ~(1 << PRADC);
+	//make X- and X+ digital
+	DDRC |= (1 << yM);
+	DDRC |= (1 << yP);
+	//make Y- and Y+ analog input
+	DDRC &= ~(1 << xM);
+	DDRC &= ~(1 << xP);
+	//set yM to high
+	PORTC |= (1 << yM);
+	//set yP to low
+	PORTC &= ~(1 << yP);
+	//set xM to adc in
+	ADMUX = (ADMUX & 0xF8);
+	ADMUX |= xm;
+	//start converting
+	ADCSRA |= (1 << ADSC);
+	//loop until we read 
+	while(ADCSRA && (1 << ADCSRA));
+	//value is read, return it
+	return ADC;
+}
+
+
+
+//This method initializes the adc to read in the voltages from the screen (we're using PC0-PC3 for ADC from the touch screen)
+void read_screen_init() {
+	ADMUX |= 1 << REFS0; //our reference is Vcc
+	ADMUX &= ~(1 << REFS1);
+	ADCSRA |= 1 << ADEN; //enable ADC
+
+	//setting the ADC with the proper prescaler
+	ADCSRA |= 1 << ADPS2;
+	ADCSRA |= 1 << ADPS1;
+	ADCSRA |= 1 << ADPS0;
+}
