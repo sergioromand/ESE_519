@@ -86,7 +86,7 @@ uint8_t color);
 
 void read_screen_init();
 
-int read_screen_x(int xM, int xP, int yM, int yP);
-int read_screen_y(int xM, int xP, int yM, int yP);
+long read_screen_x(int xM, int xP, int yM, int yP);
+long read_screen_y(int xM, int xP, int yM, int yP);
 
 void drawdiag(uint8_t *buff, uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, uint8_t color);

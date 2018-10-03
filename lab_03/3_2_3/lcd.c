@@ -4,6 +4,8 @@
 #include <util/delay.h>
 #include <avr/pgmspace.h>
 #include "lcd.h"
+#include <stdbool.h>
+#include <stdio.h>
 
 #define SID_DDR DDRD
 #define SID_PIN PIND
@@ -787,7 +789,7 @@ void drawcircle(uint8_t *buff,uint8_t x0, uint8_t y0, uint8_t r,uint8_t color) {
 		// for each pixel we will
 		// draw all eight pixels
 		circ(x0, y0, x, y, color);
-		x++;
+	x++;
 		
 		// check for decision parameter
 		// and correspondingly
@@ -875,18 +877,27 @@ void unblack_screen()
 }
 
 
+long map(long mapval, long in_min, long in_max, long out_min, long out_max)
+{
+	return (mapval - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
+
+
 //A0 (PC0) X-
 //A1 (PC1) Y+
 //A2 (PC2) X+
 //A3 (PC3) Y-
+unsigned int x_read;
+unsigned int y_read;
 
 //X- and X+ in digital mode
 //Y- and Y+ in ADC input mode
 //read y value as x coordinate
-int read_screen_x(int xM, int xP, int yM, int yP) {
+long read_screen_x(int xM, int xP, int yM, int yP) {
 	//disable power reduction
 	//PRR &= ~(1 << PRADC);
-	//make X- and X+ digital
+	//make X- and X+ digital outs
 	DDRC |= (1 << xM);
 	DDRC |= (1 << xP);
 	//make Y- and Y+ analog input
@@ -897,27 +908,39 @@ int read_screen_x(int xM, int xP, int yM, int yP) {
 	//set xP to low
 	PORTC &= ~(1 << xP);
 	//set yM to adc in
-	ADMUX &= 0xF8;
+	ADMUX &= 0xF0;
 	ADMUX |= 0x03;
 	//start converting
 	ADCSRA |= (1 << ADSC);
 	//loop until we read
-	printf("hell");
-	while(ADCSRA && (1 << ADSC));
+	while( (bool)(ADCSRA & (1 << ADIF)) == 0 );
 	//value is read, return it
-	return ADC;
+	//printf("ADC = %d\n", ADC);
+	ADCSRA |= (1 << ADIF);
+	
+	x_read = ADC;
+	if (x_read > 896){
+		x_read = 896;
+	}
+	else if (x_read < 162){
+		x_read = 162;
+	}
+	
+	x_read = map(x_read, 162,896, 0,127);
+	
+	return x_read;
 }
 
 //Y- and Y+ in digital mode
 //X- and X+ in ADC input mode
 //read x value as y coordinate
-int read_screen_y(int xM, int xP, int yM, int yP) {
+long read_screen_y(int xM, int xP, int yM, int yP) {
 	//disable power reduction
 	//PRR &= ~(1 << PRADC);
-	//make X- and X+ digital
+	//make Y- and Y+ digital
 	DDRC |= (1 << yM);
 	DDRC |= (1 << yP);
-	//make Y- and Y+ analog input
+	//make X- and X+ analog input
 	DDRC &= ~(1 << xM);
 	DDRC &= ~(1 << xP);
 	//set yM to high
@@ -925,24 +948,60 @@ int read_screen_y(int xM, int xP, int yM, int yP) {
 	//set yP to low
 	PORTC &= ~(1 << yP);
 	//set xM to adc in
-	ADMUX = (ADMUX & 0xF8);
-	ADMUX |= xM;
+	ADMUX &= 0xF0;
 	//start converting
 	ADCSRA |= (1 << ADSC);
 	//loop until we read
-	while(ADCSRA && (1 << ADCSRA));
+	while( (bool)(ADCSRA & (1 << ADIF)) == 0 );
 	//value is read, return it
-	return ADC;
+	ADCSRA |= (1 << ADIF);
+	
+	y_read = ADC;
+	if (y_read > 704){
+		y_read = 704;
+	}
+	else if (y_read < 217){
+		y_read = 217;
+	}
+	
+	y_read = map(y_read,217,704,63,0);
+
+	return y_read;
+	
 }
 
 //This method initializes the adc to read in the voltages from the screen (we're using PC0-PC3 for ADC from the touch screen)
 void read_screen_init() {
-	ADMUX |= 1 << REFS0; //our reference is Vcc
-	ADMUX &= ~(1 << REFS1);
+	ADMUX |= 1 << REFS0; //our reference is Vcc, 
+	ADMUX &= ~(1 << REFS1);  // so REFS1,REFS0 = 01
 	ADCSRA |= 1 << ADEN; //enable ADC
 
 	//setting the ADC with the proper prescaler
 	ADCSRA |= 1 << ADPS2;
 	ADCSRA |= 1 << ADPS1;
-	ADCSRA |= 1 << ADPS0;
+	ADCSRA |= 1 << ADPS0;   // how did we determine this prescaler = 128?
 }
+
+int standby_mode() {   //PORTC0, PORTC2, PORTC3, PORTC1   x- x+ y- y+
+	
+	DDRC |= (1 << PORTC2);   // x+ is dig. output and ground it
+	PORTC &= ~(1 << PORTC2);
+	
+	DDRC &= ~(1 << PORTC0);  // x- is input (Hi-Z)	
+	DDRC &= ~(1 << PORTC1);  // y+ is input (Hi-Z)
+		
+	DDRC &= ~(1 << PORTC3);  // y- is input ...
+	PORTC |= (1 << PORTC3);  // ... with Pull-up 
+	
+	int val = (bool)(PINC & (1 << PINC3));
+	_delay_ms(2);
+	
+	if ( (bool)(PINC & (1 << PINC3)) == 0 ) {
+		return (1);
+		//printf("1");
+		} 
+	else if ( (bool)(PINC & (1 << PINC3)) == 1 ){
+		return (0);
+		//printf("0");
+		}
+	}
