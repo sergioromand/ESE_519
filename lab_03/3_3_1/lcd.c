@@ -34,6 +34,8 @@
 
 uint8_t is_reversed = 0;
 
+int old_paddle_A = 32;
+int old_paddle_B = 32;
 
 int pagemap[] = { 3, 2, 1, 0, 7, 6, 5, 4 };
 
@@ -591,6 +593,7 @@ void clearline(uint8_t *buff,uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1)
 		cleardiag(buff,x0,y0,x1,y1);
 	}
 }
+
 void drawline(uint8_t *buff,uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1,uint8_t color)
 {
 	//sorting
@@ -896,6 +899,16 @@ void fillcirc(uint8_t *buff,uint8_t x0, uint8_t y0, uint8_t x, uint8_t y,uint8_t
 
 }
 
+void clearcirc(uint8_t *buff,uint8_t x0, uint8_t y0, uint8_t x, uint8_t y){
+	
+	clearline(buff, x0 - x, y0 + y, x0 + x, y0 + y);
+	clearline(buff, x0 - x, y0 - y, x0 + x, y0 - y);
+	clearline(buff, x0 - y, y0 + x, x0 + y, y0 + x);
+	clearline(buff, x0 - y, y0 - x, x0 + y, y0 - x);
+
+
+}
+
 // function to draw a filled circle
 void fillcircle(uint8_t *buff,uint8_t x0, uint8_t y0, uint8_t r,uint8_t color) {
 	
@@ -919,6 +932,33 @@ void fillcircle(uint8_t *buff,uint8_t x0, uint8_t y0, uint8_t r,uint8_t color) {
 		else
 		d = d + 4 * x + 6;
 		fillcirc(buff, x0, y0, x, y, color);
+		//delay(50);
+	}
+}
+
+// function to draw a filled circle
+void clear_fillcircle(uint8_t *buff,uint8_t x0, uint8_t y0, uint8_t r,uint8_t color) {
+	
+	int x = 0, y = r;
+	int d = 3 - 2 * r;
+	while (y >= x)
+	{
+		// for each pixel we will
+		// draw all eight pixels
+		clearcirc(buff,x0, y0, x, y);
+		x++;
+		
+		// check for decision parameter
+		// and correspondingly
+		// update d, x, y
+		if (d > 0)
+		{
+			y--;
+			d = d + 4 * (x - y) + 10;
+		}
+		else
+		d = d + 4 * x + 6;
+		clearcirc(buff, x0, y0, x, y);
 		//delay(50);
 	}
 }
@@ -1073,15 +1113,163 @@ int standby_mode() {   //PORTC0, PORTC2, PORTC3, PORTC1   x- x+ y- y+
 	DDRC &= ~(1 << PORTC3);  // y- is input ...
 	PORTC |= (1 << PORTC3);  // ... with Pull-up 
 	
-	int val = (bool)(PINC & (1 << PINC3));
+	// for debug //   int val = (bool)(PINC & (1 << PINC3));
 	_delay_ms(2);
 	
 	if ( (bool)(PINC & (1 << PINC3)) == 0 ) {
 		return (1);
-		//printf("1");
 		} 
-	else if ( (bool)(PINC & (1 << PINC3)) == 1 ){
+	else //if ( (bool)(PINC & (1 << PINC3)) == 1 ){   
+		{	
 		return (0);
-		//printf("0");
+		}
+}
+	
+void draw_game_borders(){   //   draw the game boundary and mid-line
+	//drawline(buff,0,0,0,63,1);         
+	//drawline(buff,0,63,127,63,1);
+	//drawline(buff,127,63,127,0,1);
+	//drawline(buff,127,0,0,0,1);
+	drawline(buff,1,1,1,64,1);
+	drawline(buff,1,64,128,64,1);
+	drawline(buff,128,64,128,1,1);
+	drawline(buff,128,1,1,1,1);
+	
+	for (int i = 0 ; i <= 127; i=i+2)
+	{
+		setpixel(buff,64,i,1);
+		setpixel(buff,65,i+1,1);
+	}
+	
+	write_buffer(buff);
+
+}
+
+void draw_paddleA(long y){
+	
+				clearline(buff,4,2,4,63);
+				clearline(buff,5,2,5,63);
+	drawline(buff,4,y+5,4,y-5,1);
+	drawline(buff,5,y+5,5,y-5,1);
+}
+
+void draw_paddleB(long y){
+	
+				clearline(buff,124,2,124,63);
+				clearline(buff,125,2,125,63);
+	drawline(buff,125,y+5,125,y-5,1);
+	drawline(buff,124,y+5,124,y-5,1);
+}
+
+
+	
+long x;
+long y;	
+
+void get_new_paddle_target(){
+}
+
+
+void move_paddle(){
+	
+	x = read_screen_x(PORTC0, PORTC2, PORTC3, PORTC1);   // x- x+ y- y+
+	y = read_screen_y(PORTC0, PORTC2, PORTC3, PORTC1);
+	
+		if		(y<6)					{y=6;}
+		else if (y>59)					{y=59;}
+		else							{;}
+	
+	int updown;
+				
+	if (x<=64)  // paddle A
+	{
+		
+		if		(old_paddle_A > y)	{updown = 1;}
+		else if (old_paddle_A < y)	{updown = 0;}
+		else return;
+			
+		if (updown==1) {
+		
+			for (int i = old_paddle_A ; i >= y ; i--){
+				draw_paddleA(i);
+			}
+			old_paddle_A = y;
+		}
+		else if (updown==0) {
+			
+			for (int i = old_paddle_A ; i <= y ; i++){
+
+				draw_paddleA(i);
+			}
+			old_paddle_A = y;
+
 		}
 	}
+	
+	else if (x>=65)  // paddle B
+	{
+		if		(old_paddle_B > y)	{updown = 1;}
+		else if (old_paddle_B < y)	{updown = 0;}
+		else return;
+		
+		if (updown==1) {
+			
+			for (int i = old_paddle_B ; i >= y ; i--){
+
+				draw_paddleB(i);
+			}
+			old_paddle_B = y;
+		}
+		else if (updown==0) {
+			
+			for (int i = old_paddle_B ; i <= y ; i++){
+	
+				draw_paddleB(i);
+			}
+			old_paddle_B = y;
+		}
+
+	}
+	
+
+}
+
+void display_score_A(int score){
+	char char_score =  score + '0';
+	drawchar(buff,51,1,char_score);
+}
+
+void display_score_B(int score){
+	char char_score =  score + '0';
+	drawchar(buff,72,1,char_score);
+}
+
+void init_play(){	
+
+	 old_paddle_A = 32;    // bring paddles to middle
+	 old_paddle_B = 32;
+	 
+	if ( (Ascore == 10) || (Bscore == 10) ){   // if someone gets to 10, 
+		celebrate_winner();                    // flash the LCD and start over game
+		Ascore = 0;
+		Bscore = 0;
+	}
+	
+	if ( (Ascore == 0) && (Bscore == 0) ){
+		;  // say "new game!!!"   
+	}
+	
+	display_score_A(Ascore);
+	display_score_B(Bscore);
+	
+	draw_paddleA(old_paddle_A);
+	draw_paddleB(old_paddle_B);
+	
+	fillcircle(buff,64,32,2,1);
+
+}
+
+void celebrate_winner(){
+	//   flash the screen 
+	//   say congrats?  
+	;}

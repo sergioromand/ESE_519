@@ -86,7 +86,23 @@ uint8_t color);
 
 void read_screen_init();
 
+void init_play();
+
+void celebrate_winner();
+
 long read_screen_x(int xM, int xP, int yM, int yP);
 long read_screen_y(int xM, int xP, int yM, int yP);
 
 void drawdiag(uint8_t *buff, uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, uint8_t color);
+void cleardiag(uint8_t *buff, uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1);
+
+void draw_game_borders();
+int standby_mode();
+void move_paddle();
+void display_score_A( int score);
+void display_score_B( int score);
+
+
+
+int Ascore ;
+int Bscore ;
