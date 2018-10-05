@@ -1192,6 +1192,7 @@ void move_paddle(){
 		
 			for (int i = old_paddle_A ; i >= y ; i--){
 				draw_paddleA(i);
+				write_buffer(buff);
 			}
 			old_paddle_A = y;
 		}
@@ -1200,6 +1201,7 @@ void move_paddle(){
 			for (int i = old_paddle_A ; i <= y ; i++){
 
 				draw_paddleA(i);
+				write_buffer(buff);
 			}
 			old_paddle_A = y;
 
@@ -1217,6 +1219,7 @@ void move_paddle(){
 			for (int i = old_paddle_B ; i >= y ; i--){
 
 				draw_paddleB(i);
+				write_buffer(buff);
 			}
 			old_paddle_B = y;
 		}
@@ -1225,6 +1228,7 @@ void move_paddle(){
 			for (int i = old_paddle_B ; i <= y ; i++){
 	
 				draw_paddleB(i);
+				write_buffer(buff);
 			}
 			old_paddle_B = y;
 		}

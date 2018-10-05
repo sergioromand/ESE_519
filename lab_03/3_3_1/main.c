@@ -51,20 +51,21 @@ int main(void)
 	read_screen_init();
 	
 	init_play();
-
+draw_game_borders();
+write_buffer(buff);
 	
 	while (1)
 	{	
 		
-		/*  working prototype 10.04.18	
+		//  working prototype 10.04.18	
 		touch = standby_mode();
 		if (touch){
 			move_paddle();	
 			write_buffer(buff);
 			}	
-		*/
+	
 		
-		draw_game_borders();
+		/*draw_game_borders();
 		write_buffer(buff);
 		
 		touch = standby_mode();
@@ -84,7 +85,7 @@ int main(void)
 			//			move_paddle();
 			//			move_ball();
 			//			write_buffer(buff);
-		}	
+		}*/	
 		
 	}
 }
