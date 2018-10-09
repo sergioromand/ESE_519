@@ -1158,8 +1158,8 @@ void draw_paddleB(long y){
 void get_new_paddle_target(){
 }
 
-long x;
-long y;
+//long x;
+//long y;
 
 /*void move_paddle(){
 	

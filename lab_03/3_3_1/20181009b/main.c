@@ -339,8 +339,8 @@ int main(void)
 				
 				contact_point = ( ball_newY - (newB-6) );
 				
-				printf("contact point = %d\n", contact_point);
-				
+				printf("contact point = %d   newB = %d   ball_newY = %d  \n", contact_point, newB, ball_newY);
+							
 				switch (contact_point)
 				{	
 					
@@ -389,7 +389,7 @@ int main(void)
 				if (continue_after_goal==0)
 				{				
 				Ascore++;
-				lcd_aqua();
+				lcd_skyblue();
 				_delay_ms(2000);				
 				clear_ball(ball_newX,ball_newY);
 				init_play(32,32);

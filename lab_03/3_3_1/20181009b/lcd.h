@@ -115,6 +115,7 @@ void move_ball(int ball_x, int ball_y);
 void draw_paddleA(long y);
 void draw_paddleB(long y);
 
+
 int Ascore ;
 int Bscore ;
 
