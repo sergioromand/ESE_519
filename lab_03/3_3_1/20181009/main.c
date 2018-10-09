@@ -107,54 +107,48 @@ int main(void)
 				//	then calc the distance from current position to new position for corresponding paddle
 				//  and set the "paddle moving" flag for the corresponding paddle 
 			
-		//if	( (paddleA_moving==1) && (touch_y != old_paddleA) )	// paddle A
-		if	 (paddleA_moving==1)	// paddle A
+		if	 (paddleA_moving==1)	
 		{
 			if ( (updownA==1) && (paddleA_dy>=0) )
 			{
 				draw_paddleA(newA+paddleA_dy);
-				if (paddleA_dy>0)	{paddleA_dy--;};
+				paddleA_dy--;
 				old_paddleA = newA+paddleA_dy;
 			}
 			else if ( (updownA==0) && (paddleA_dy>=0) ) 
 			{
 				draw_paddleA(newA-paddleA_dy);
-				if (paddleA_dy>0)	{paddleA_dy--;};
+				paddleA_dy--;
 				old_paddleA = newA-paddleA_dy;
 			}
 			
-			else if ( paddleA_dy == 0 )
+			if ( paddleA_dy < 0 )
 			{
 				paddleA_moving = 0;
-				printf("never?");
 			}			
 		}	
 		
-		if ( (paddleB_moving==1) && (newB != old_paddleB)) // paddle B
+		if   (paddleB_moving==1)  // paddle B
 		{
 
 			if ( (updownB==1) && (paddleB_dy>=0) )
 			{
 				draw_paddleB(newB+paddleB_dy);
-				if (paddleB_dy>0)	{paddleB_dy--;};
+				paddleB_dy--;
 				old_paddleB = newB+paddleB_dy;
 			}
 			else if ( (updownB==0) && (paddleB_dy>=0) )
 			{
 				draw_paddleB(newB-paddleB_dy);
-				if (paddleB_dy>0)	{paddleB_dy--;};
+				paddleB_dy--;
 				old_paddleB = newB-paddleB_dy;
 			}
 			
-			else if ( paddleB_dy == 0 )
+			if ( paddleB_dy < 0 )
 			{
 				paddleB_moving = 0;
 			}				
 		}
-						
-				
-			//	determine "A side touch" or "B side touch" 
-			//		update next "y" for draw_paddleA or next "y" for draw_paddleB
 		
 		if (ball_contact){;
 			//	check for ball contact with wall or paddle
@@ -169,11 +163,6 @@ int main(void)
 			//			move_ball();
 			//			write_buffer(buff);
 			
-		/*printf("newA = %d", newA); 
-		printf("  paddleA_dy = %d", paddleA_dy);
-		printf("  old_paddleA = %d",old_paddleA);
-		printf("  updownA = %d", updownA);
-		printf("  paddleA_moving = %d\n",paddleA_moving);*/
 		}	
 		
 	}
