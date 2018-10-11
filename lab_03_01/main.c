@@ -58,11 +58,6 @@ int tipoff = 0;
 int continue_after_goal;
 int increase_speed=0;
 
-//accelerometer version
-//maxLeft = 264
-//still = 318
-//maxRight = 372
-
 
 void init_play(int A, int B){
 	
@@ -162,7 +157,7 @@ int main(void)
 	
 	init_play(32,32);
 	
-	//read_screen_init();
+	read_screen_init();
 	
 	
 		//printf("ball_newY after init  = %d \n ", ball_newY);
@@ -171,21 +166,83 @@ int main(void)
 	{			
 		draw_game_borders();
 		
-		display_score_A(Ascore);
-		display_score_B(Bscore);
+			display_score_A(Ascore);
+			display_score_B(Bscore);
 			
 		write_buffer(buff);
-
-		// move the A paddle
-		int tilt = readTilt();
-		//adjust to x-y position
-		int newX = ((tilt - 250) * 53) / 108;
-		newX = (59 - newX) + 10;
-		if		(newX<6)				{newX=6;}
-		else if (newX>59)				{newX=59;}
-		draw_paddleA(newX);
-
 		
+		touch = standby_mode();
+		if (touch)
+		{
+			touch_x = read_screen_x(PORTC0, PORTC2, PORTC3, PORTC1);   // x- x+ y- y+
+			touch_y = read_screen_y(PORTC0, PORTC2, PORTC3, PORTC1);
+			if		(touch_y<6)					{touch_y=6;}
+			else if (touch_y>59)				{touch_y=59;}   // prevent paddle from trying to draw out-of-bounds
+			
+			if	(touch_x <= 64)	
+			{ 
+				newA = touch_y;
+				paddleA_dy = abs(old_paddleA-touch_y); 
+				paddleA_moving = 1;
+				if		(old_paddleA > newA)	{updownA = 1;}
+				else if (old_paddleA < newA)	{updownA = 0;}				
+			}
+			/*else if	(touch_x >= 65)	
+			{ 
+				newB = touch_y;
+				paddleB_dy = abs(old_paddleB-touch_y);
+				paddleB_moving = 1; 
+				if		(old_paddleB > newB)	{updownB = 1;}
+				else if (old_paddleB < newB)	{updownB = 0;}				
+			}*/
+		}       //  if we get a touch then measure x, y and determine which side of the board it is on,
+				//	then calc the distance from current position to new position for corresponding paddle
+				//  and set the "paddle moving" flag for the corresponding paddle 
+			
+		if	 (paddleA_moving==1)	
+		{
+			if ( (updownA==1) && (paddleA_dy>=0) )
+			{
+				draw_paddleA(newA+paddleA_dy);
+				paddleA_dy--;
+				old_paddleA = newA+paddleA_dy;
+			}
+			else if ( (updownA==0) && (paddleA_dy>=0) ) 
+			{
+				draw_paddleA(newA-paddleA_dy);
+				paddleA_dy--;
+				old_paddleA = newA-paddleA_dy;
+			}
+			
+			if ( paddleA_dy < 0 )
+			{
+				paddleA_moving = 0;
+			}			
+		}	
+		
+		/*if   (paddleB_moving==1)  // paddle B
+		{
+
+			if ( (updownB==1) && (paddleB_dy>=0) )
+			{
+				draw_paddleB(newB+paddleB_dy);
+				paddleB_dy--;
+				old_paddleB = newB+paddleB_dy;
+			}
+			else if ( (updownB==0) && (paddleB_dy>=0) )
+			{
+				draw_paddleB(newB-paddleB_dy);
+				paddleB_dy--;
+				old_paddleB = newB-paddleB_dy;
+			}
+			
+			if ( paddleB_dy < 0 )
+			{
+				paddleB_moving = 0;
+			}				
+		}*/
+		
+	
 		/////////////////////////////////////////////////////////
 		///////////    just move the ball ///////////////////////
 		/////////////////////////////////////////////////////////		
