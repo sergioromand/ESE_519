@@ -78,7 +78,7 @@ void init_play(int A, int B){
 	if ( (Ascore == 0) && (Bscore == 0) ){
 		;  // say "new game!!!"
 	}
-	//lcd_grassgreen();
+	lcd_grassgreen();
 	
 	display_score_A(Ascore);
 	display_score_B(Bscore);
@@ -179,11 +179,11 @@ int main(void)
 		// move the A paddle
 		int tilt = readTilt();
 		//adjust to x-y position
-		int newX = ((tilt - 250) * 53) / 108;
-		newX = (59 - newX) + 10;
-		if		(newX<6)				{newX=6;}
-		else if (newX>59)				{newX=59;}
-		draw_paddleA(newX);
+		int newA = ((tilt - 250) * 53) / 108;
+		newA = (59 - newA) + 10;
+		if		(newA<6)				{newA=6;}
+		else if (newA>59)				{newA=59;}
+		draw_paddleA(newA);
 
 		
 		/////////////////////////////////////////////////////////
@@ -216,6 +216,7 @@ int main(void)
 			if ( ((newA-6) <= ball_newY) && (ball_newY <= (newA+6)) && (ball_newX == 8) )
 			{ 
 				ball_dX = - ball_dX;
+				buzz();
 			
 				contact_point = ( ball_newY - (newA-6) ); 
 				
@@ -266,6 +267,7 @@ int main(void)
 				if (continue_after_goal == 0)
 				{
 				Bscore++;
+				buzz();
 				lcd_skyblue();
 				clear_ball(ball_newX,ball_newY);
 				_delay_ms(2000);
@@ -308,6 +310,7 @@ int main(void)
 				ball_dX = - ball_dX;
 				
 				contact_point = ( ball_newY - (newB-6) );
+				buzz();
 				
 				//printf("contact point = %d   newB = %d   ball_newY = %d  \n", contact_point, newB, ball_newY);
 							
@@ -359,6 +362,7 @@ int main(void)
 				if (continue_after_goal==0)
 				{				
 				Ascore++;
+				buzz();
 				lcd_skyblue();
 				_delay_ms(2000);				
 				clear_ball(ball_newX,ball_newY);
