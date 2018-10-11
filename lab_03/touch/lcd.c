@@ -1096,26 +1096,6 @@ void read_screen_init() {
 	ADCSRA |= 1 << ADPS0;   
 }
 
-long readTilt() {
-	ADMUX |= 1 << REFS0; //our reference is Vcc, 
-	ADMUX &= ~(1 << REFS1);  // so REFS1,REFS0 = 01
-	ADCSRA |= 1 << ADEN; //enable ADC
-	//setting the ADC with the proper prescaler
-	ADCSRA |= 1 << ADPS2;
-	ADCSRA |= 1 << ADPS1;
-	ADCSRA |= 1 << ADPS0;   // how did we determine this prescaler = 128?
-	//enable read input
-	//set ADMUX's last 4 bits to zero
-	ADMUX &= 0xF0;
-	ADMUX |= 0x04; 
-	//enable ADC
-	ADCSRA |= (1 << ADSC);
-	//read until we get a flag
-	while((bool)(ADCSRA & (1 << ADIF)) == 0);
-	//reading done, return ADC
-	return ADC;
-}
-
 int standby_mode() {   //PORTC0, PORTC2, PORTC3, PORTC1   x- x+ y- y+
 
 

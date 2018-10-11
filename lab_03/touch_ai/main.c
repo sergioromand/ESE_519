@@ -73,7 +73,7 @@ void init_play(int A, int B){
 	if ( (Ascore == 0) && (Bscore == 0) ){
 		;  // say "new game!!!"
 	}
-	//lcd_grassgreen();
+	lcd_grassgreen();
 	
 	display_score_A(Ascore);
 	display_score_B(Bscore);
@@ -187,14 +187,6 @@ int main(void)
 				if		(old_paddleA > newA)	{updownA = 1;}
 				else if (old_paddleA < newA)	{updownA = 0;}				
 			}
-			/*else if	(touch_x >= 65)	
-			{ 
-				newB = touch_y;
-				paddleB_dy = abs(old_paddleB-touch_y);
-				paddleB_moving = 1; 
-				if		(old_paddleB > newB)	{updownB = 1;}
-				else if (old_paddleB < newB)	{updownB = 0;}				
-			}*/
 		}       //  if we get a touch then measure x, y and determine which side of the board it is on,
 				//	then calc the distance from current position to new position for corresponding paddle
 				//  and set the "paddle moving" flag for the corresponding paddle 
@@ -219,28 +211,6 @@ int main(void)
 				paddleA_moving = 0;
 			}			
 		}	
-		
-		/*if   (paddleB_moving==1)  // paddle B
-		{
-
-			if ( (updownB==1) && (paddleB_dy>=0) )
-			{
-				draw_paddleB(newB+paddleB_dy);
-				paddleB_dy--;
-				old_paddleB = newB+paddleB_dy;
-			}
-			else if ( (updownB==0) && (paddleB_dy>=0) )
-			{
-				draw_paddleB(newB-paddleB_dy);
-				paddleB_dy--;
-				old_paddleB = newB-paddleB_dy;
-			}
-			
-			if ( paddleB_dy < 0 )
-			{
-				paddleB_moving = 0;
-			}				
-		}*/
 		
 	
 		/////////////////////////////////////////////////////////
@@ -270,13 +240,14 @@ int main(void)
 		////////////////////////////////////////////////////////////
 		if (ball_newX <= 8)       
 		{			             // the the new position is in the paddleA zone, check for contact, else score a goal
-			if ( ((newA-6) <= ball_newY) && (ball_newY <= (newA+6)) && (ball_newX == 8) )
+			if ( ((newA-6) <= ball_newY) && (ball_newY <= (newA+5)) && (ball_newX == 8) )
 			{ 
 				ball_dX = - ball_dX;
+				buzz();
 			
 				contact_point = ( ball_newY - (newA-6) ); 
 				
-				//printf("contact point = %d\n", contact_point);
+				printf("contact point = %d\n", contact_point);
 
 				switch (contact_point)
 				{
@@ -323,6 +294,7 @@ int main(void)
 				if (continue_after_goal == 0)
 				{
 				Bscore++;
+				buzz();
 				lcd_skyblue();
 				clear_ball(ball_newX,ball_newY);
 				_delay_ms(2000);
@@ -355,7 +327,6 @@ int main(void)
 				paddleB_moving = 0;
 			}				
 		}
-
 		////////////////////////////////////////////////////////////
 		if (ball_newX >= 121)
 		{			             // the the new position is in the paddleB zone, check for contact, else score a goal
@@ -363,10 +334,11 @@ int main(void)
 			if ( ((newB-6) < ball_newY) && (ball_newY < (newB+6)) && (ball_newX == 121)  )
 			{
 				ball_dX = - ball_dX;
+				buzz();
 				
 				contact_point = ( ball_newY - (newB-6) );
 				
-				//printf("contact point = %d   newB = %d   ball_newY = %d  \n", contact_point, newB, ball_newY);
+				printf("contact point = %d   newB = %d   ball_newY = %d  \n", contact_point, newB, ball_newY);
 							
 				switch (contact_point)
 				{	
@@ -405,7 +377,7 @@ int main(void)
 						ball_dY = 3;
 						break;
 					default:
-						//printf("default");
+						printf("default");
 						break;
 				}
 			}
@@ -416,6 +388,7 @@ int main(void)
 				if (continue_after_goal==0)
 				{				
 				Ascore++;
+				buzz();
 				lcd_skyblue();
 				_delay_ms(2000);				
 				clear_ball(ball_newX,ball_newY);

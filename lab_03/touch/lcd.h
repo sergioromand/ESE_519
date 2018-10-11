@@ -63,9 +63,6 @@ void lcd_off();
 void clear_screen(void);				
 void clear_buffer(uint8_t *buff);
 void write_buffer(uint8_t *buff);
-void buzz();
-long readTilt();
-
 
 void setpixel(uint8_t *buff, uint8_t x, uint8_t y, uint8_t color);
 void clearpixel(uint8_t *buff, uint8_t x, uint8_t y);
@@ -126,3 +123,4 @@ void draw_ball(int x, int y);
 
 
 void clear_ball(int x, int y);
+void buzz();
